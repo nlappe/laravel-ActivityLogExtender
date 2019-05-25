@@ -1,5 +1,5 @@
 {
-    "name": "nlappe/LaravelActivityLogExtender",
+    "name": "nlappe/laravel-activity-log-extender",
     "type": "library",
     "description": "A small trait that offers additional generic functions to log and aggregate ActivityLogs written by spatie/laravel-activitylog. Its usefull for Statistics.",
     "keywords": ["spatie","ActivityLog","Statistics","aggregate", "Trait"],
