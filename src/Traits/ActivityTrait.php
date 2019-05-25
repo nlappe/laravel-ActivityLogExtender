@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use ReflectionClass;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -36,9 +35,9 @@ trait ActivityTrait
      * @param Carbon $to
      * @return int
      */
-    public static function getActivityTopicCountPerDateRange(string $topic, Carbon $from, Carbon $to)
+    public static function getActivityTopicCountPerDateRange(string $topic, Carbon $from = null, Carbon $to = null)
     {
-        return ActivityTrait::getActivityWhereBetween($topic, $from, $to)
+        return static::activityTopicWhereBetween($topic, $from, $to)
             ->count();
     }
 
@@ -48,9 +47,9 @@ trait ActivityTrait
      * @param Carbon $to
      * @return Collection
      */
-    public static function getActivityTopicPerDateRange(string $topic, Carbon $from, Carbon $to)
+    public static function getActivityTopicWhereBetween(string $topic, Carbon $from = null, Carbon $to = null)
     {
-        return ActivityTrait::getActivityWhereBetween($topic, $from, $to)
+        return static::activityTopicWhereBetween($topic, $from, $to)
             ->get();
     }
 
@@ -64,7 +63,7 @@ trait ActivityTrait
     {
         $from = isset($from) ? $from : Carbon::now()->subDays(7);
         $to = isset($to) ? $to : Carbon::now()->addDay(); //add one to include the submitted day
-        return static::getActivityModelClass()::inLog(strtoupper(ActivityTrait::getLogNameToUse()))
+        return static::getActivityModelClass()::inLog(strtolower(static::getLogNameToUse()))
             ->where('description', $topic)
             ->whereBetween('created_at', [$from, $to]);
     }
@@ -73,7 +72,7 @@ trait ActivityTrait
      * @param string $topic
      * @return Builder
      */
-    public function getActivitiesWhereTopic(string $topic)
+    public function activitiesWhereTopic(string $topic)
     {
         return $this
             ->activities()
@@ -84,7 +83,7 @@ trait ActivityTrait
      * @param string $topic
      * @return Builder
      */
-    public function getActivityTopicSum(string $topic)
+    public function getActivitySumByTopic(string $topic)
     {
         return $this
             ->getActivitiesWhereTopic($topic)
