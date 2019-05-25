@@ -1,7 +1,7 @@
 {
     "name": "nlappe/LaravelActivityLogExtender",
     "type": "library",
-    "description": "A small trait that offers additional generic functions to log and aggregate ActivityLogs written by spatie/laravel-activitylog. It uses spatie/Enum to fixate Log types. Its usefull for Statistics.",
+    "description": "A small trait that offers additional generic functions to log and aggregate ActivityLogs written by spatie/laravel-activitylog. Its usefull for Statistics.",
     "keywords": ["spatie","ActivityLog","Statistics","aggregate", "Trait"],
     "homepage": "https://github.com/nlappe",
     "license": "MIT",
