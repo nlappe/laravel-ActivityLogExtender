@@ -2,103 +2,100 @@
 
 namespace nlappe\LaravelActivityLogExtender\Traits;
 
-use nlappe\LaravelActivityLogExtender\Constants\ActivityLogTopics;
-use nlappe\LaravelActivityLogExtender\Constants\ActivityLogTypes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use ReflectionClass;
-use ReflectionException;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 trait ActivityTrait
 {
     use LogsActivity;
-
-    protected static $logName;
-
-    public function getClass()
+    /**
+     * @return string
+     */
+    public static function getActivityModelClass()
     {
-        return new ReflectionClass(self::class);
+        return Activity::class;
     }
 
     /**
-     * @return ActivityLogTypes
+     * @return string
      */
-    public static function getUseLogType()
+    public static function getLogNameToUse()
     {
         $classNameParts = explode('\\', self::class);
-        return ActivityLogTypes::make(strtoupper($classNameParts[count($classNameParts) - 1]) . '_LOG');
+        return strtoupper($classNameParts[count($classNameParts) - 1]) . '_LOG';
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @param Carbon $from
      * @param Carbon $to
      * @return int
      */
-    public static function getActivityTopicCountPerDateRange(ActivityLogTopics $topic, Carbon $from, Carbon $to)
+    public static function getActivityTopicCountPerDateRange(string $topic, Carbon $from, Carbon $to)
     {
         return ActivityTrait::getActivityWhereBetween($topic, $from, $to)
             ->count();
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @param Carbon $from
      * @param Carbon $to
      * @return Collection
-     * @throws ReflectionException
      */
-    public static function getActivityTopicPerDateRange(ActivityLogTopics $topic, Carbon $from, Carbon $to)
+    public static function getActivityTopicPerDateRange(string $topic, Carbon $from, Carbon $to)
     {
         return ActivityTrait::getActivityWhereBetween($topic, $from, $to)
             ->get();
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @param Carbon $from
      * @param Carbon $to
      * @return Builder
      */
-    public static function getActivityWhereBetween(ActivityLogTopics $topic, Carbon $from, Carbon $to)
+    public static function activityTopicWhereBetween(string $topic, Carbon $from = null, Carbon $to = null)
     {
         $from = isset($from) ? $from : Carbon::now()->subDays(7);
         $to = isset($to) ? $to : Carbon::now()->addDay(); //add one to include the submitted day
-        return Activity::inLog(strtoupper(ActivityTrait::getUseLogType()->getValue()))
-            ->where('description', $topic->getValue())
+        return static::getActivityModelClass()::inLog(strtoupper(ActivityTrait::getLogNameToUse()))
+            ->where('description', $topic)
             ->whereBetween('created_at', [$from, $to]);
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @return Builder
      */
-    public function getActivitiesWhereTopic(ActivityLogTopics $topic)
+    public function getActivitiesWhereTopic(string $topic)
     {
         return $this
             ->activities()
-            ->where('description', $topic->getValue());
+            ->where('description', $topic);
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @return Builder
      */
-    public function getActivityTopicSum(ActivityLogTopics $topic)
+    public function getActivityTopicSum(string $topic)
     {
         return $this
-            ->getActivitiesWhereTopic($topic);
+            ->getActivitiesWhereTopic($topic)
+            ->count();
     }
 
     /**
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      * @return Model
      */
-    public function getActivityLastTopic(ActivityLogTopics $topic)
+    public function getLastActivityByTopic(string $topic)
     {
         return $this
             ->getActivitiesWhereTopic($topic)
@@ -109,19 +106,14 @@ trait ActivityTrait
     /**
      * @param Model $target
      * @param Model $causer
-     * @param ActivityLogTopics $topic
+     * @param string $topic
      */
-    public static function log(Model $target, Model $causer, ActivityLogTopics $topic)
+    public static function log(Model $target, Model $causer, string $topic)
     {
         activity()
             ->performedOn($target)
             ->causedBy($causer)
-            ->useLog(self::getUseLogType()->getValue())
-            ->log($topic->getValue());
-    }
-
-    public function getLogNameToUse(): string
-    {
-        return isset(static::$logName) ? static::$logName : $this->getUseLogType();
+            ->useLog(ActivityTrait::getLogNameToUse())
+            ->log($topic);
     }
 }
