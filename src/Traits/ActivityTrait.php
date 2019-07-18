@@ -25,8 +25,7 @@ trait ActivityTrait
      */
     public static function getLogNameToUse()
     {
-        $classNameParts = explode('\\', self::class);
-        return strtoupper($classNameParts[count($classNameParts) - 1]) . '_LOG';
+        return strtoupper(class_basename(static::class)) . '_LOG';
     }
 
     /**
