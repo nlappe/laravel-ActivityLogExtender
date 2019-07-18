@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\ActivitylogServiceProvider;
 
 trait ActivityTrait
 {
@@ -17,7 +18,7 @@ trait ActivityTrait
      */
     public static function getActivityModelClass()
     {
-        return Activity::class;
+        return ActivitylogServiceProvider::determineActivityModel();
     }
 
     /**
