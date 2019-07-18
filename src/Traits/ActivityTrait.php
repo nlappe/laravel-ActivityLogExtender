@@ -111,7 +111,7 @@ trait ActivityTrait
         activity()
             ->performedOn($target)
             ->causedBy($causer)
-            ->useLog(ActivityTrait::getLogNameToUse())
+            ->useLog(static::getLogNameToUse())
             ->log($topic);
     }
 }
